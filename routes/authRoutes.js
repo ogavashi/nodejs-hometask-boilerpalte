@@ -12,7 +12,7 @@ router.post(
       const user = AuthService.login(req.body);
       res.data = user;
     } catch (err) {
-      res.error = true;
+      res.is404 = true;
       res.message = err.message;
     } finally {
       next();
