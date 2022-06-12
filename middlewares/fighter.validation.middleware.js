@@ -25,7 +25,9 @@ const createFighterValid = (req, res, next) => {
 
 const updateFighterValid = (req, res, next) => {
   // TODO: Implement validatior for fighter entity during update
-  const errorsMessage = validate({ ...req.body });
+  let errorsMessage = validate({ ...req.body });
+
+  if (Object.keys(req.body).length === 0) errorsMessage += "Nothing to update \n";
 
   if (errorsMessage.length !== 0) {
     res.is400 = true;

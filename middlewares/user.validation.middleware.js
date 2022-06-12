@@ -1,10 +1,14 @@
+const e = require("express");
 const { user } = require("../models/user");
 const createUserValid = (req, res, next) => {
   // TODO: Implement validatior for user entity during creation
 
   let { id, ...mockUser } = user;
 
-  let data = Object.keys(req.body).length !== Object.keys(mockUser).length ? Object.assign({}, mockUser, req.body) : req.body;
+  let data =
+    Object.keys(req.body).length !== Object.keys(mockUser).length
+      ? Object.assign({}, mockUser, req.body)
+      : req.body;
 
   const errorsMessage = validate(data);
 
@@ -17,7 +21,9 @@ const createUserValid = (req, res, next) => {
 
 const updateUserValid = (req, res, next) => {
   // TODO: Implement validatior for user entity during update
-  const errorsMessage = validate({ ...req.body });
+  let errorsMessage = validate({ ...req.body });
+
+  if (Object.keys(req.body).length === 0) errorsMessage += "Nothing to update \n";
 
   if (errorsMessage.length !== 0) {
     res.is400 = true;
