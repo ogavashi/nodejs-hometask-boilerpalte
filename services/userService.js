@@ -15,6 +15,10 @@ class UserService {
   }
 
   update(id, data) {
+    if (!this.search({ id })) throw new Error("User not found");
+    if (this.search({ email: data?.email }) || this.search({ phoneNumber: data?.phoneNumber })) {
+      throw new Error("Email or phone number is already registered");
+    }
     const user = UserRepository.update(id, data);
     if (!user) throw new Error("Can not update user");
     return user;
@@ -22,10 +26,16 @@ class UserService {
 
   create(data) {
     const { email, phoneNumber } = data;
-    if (!!this.search({ email }) || !!this.search({ phoneNumber })) {
+    if (this.search({ email }) || this.search({ phoneNumber })) {
       throw new Error("Email or phone number is already registered");
     }
     const user = UserRepository.create(data);
+    return user;
+  }
+
+  delete(id) {
+    if (!this.search({ id })) throw new Error("User not found");
+    const user = UserRepository.delete(id);
     return user;
   }
 

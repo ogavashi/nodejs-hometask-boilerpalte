@@ -2,9 +2,13 @@ const { user } = require("../models/user");
 const createUserValid = (req, res, next) => {
   // TODO: Implement validatior for user entity during creation
 
-  const user = req.body;
-  const { errors, errorsMessage } = validate(user);
-  if (Object.keys(errors).length !== 0) {
+  let { id, ...mockUser } = user;
+
+  let data = Object.keys(req.body).length !== Object.keys(mockUser).length ? Object.assign({}, mockUser, req.body) : req.body;
+
+  const errorsMessage = validate(data);
+
+  if (errorsMessage.length !== 0) {
     res.is400 = true;
     res.message = errorsMessage;
   }
@@ -13,36 +17,17 @@ const createUserValid = (req, res, next) => {
 
 const updateUserValid = (req, res, next) => {
   // TODO: Implement validatior for user entity during update
+  const errorsMessage = validate({ ...req.body });
 
+  if (errorsMessage.length !== 0) {
+    res.is400 = true;
+    res.message = errorsMessage;
+  }
   next();
 };
 
 exports.createUserValid = createUserValid;
 exports.updateUserValid = updateUserValid;
-
-const validate = (newUser) => {
-  const errors = {};
-  if (!validateUser(newUser)) errors.Properties = `Too many properties`;
-
-  const { email, phoneNumber, password, lastName, firstName, id } = newUser;
-
-  if (!validateEmail(email)) errors.Mail = `Invalid email`;
-  if (!validatePhone(phoneNumber)) errors.Phone = `Invalid number format`;
-  if (!validatePassword(password)) errors.Password = `Password must be min 3 characters`;
-  if (!validateLastName(lastName)) errors.Surname = `Last name can't be empty`;
-  if (!validateFirstName(firstName)) errors.Name = `First name can't be empty`;
-  if (id) errors.Id = `Don't pass ID, please!`;
-
-  return { errors: errors, errorsMessage: errorConverter(errors) };
-};
-
-const validateUser = (newUser) => {
-  let noExtra = true;
-  Object.keys(newUser).forEach((prop) => {
-    if (!user.hasOwnProperty(prop)) noExtra = false;
-  });
-  return noExtra;
-};
 
 const validateEmail = (mail) => {
   return mail && mail.match(/^\w+([\.-]?\w+)*@gmail.com/);
@@ -57,18 +42,56 @@ const validatePassword = (password) => {
 };
 
 const validateLastName = (lastName) => {
-  return !!lastName;
+  return isNaN(lastName);
 };
 
 const validateFirstName = (firstName) => {
-  return !!firstName;
+  return isNaN(firstName);
 };
 
-const errorConverter = (errors) => {
-  let errorMessage = "";
-  for (let [key, value] of Object.entries(errors)) {
-    errorMessage += `${key}: ${value}.\n`;
-  }
+const validate = (newUser) => {
+  let error = "";
 
-  return errorMessage;
+  Object.keys(newUser).forEach((prop) => {
+    switch (prop) {
+      case "email":
+        if (!validateEmail(newUser[prop])) {
+          error += `Invalid email. \n`;
+        }
+        break;
+
+      case "password":
+        if (!validatePassword(newUser[prop])) {
+          error += `Password must be min 3 characters. \n`;
+        }
+        break;
+
+      case "phoneNumber":
+        if (!validatePhone(newUser[prop])) {
+          error += `Invalid number format. \n`;
+        }
+        break;
+
+      case "lastName":
+        if (!validateLastName(newUser[prop])) {
+          error += `Invalid last name. \n`;
+        }
+        break;
+
+      case "firstName":
+        if (!validateFirstName(newUser[prop])) {
+          error += `Invalid first name. \n`;
+        }
+        break;
+
+      case "id":
+        error += `Don't pass ID, please! \n`;
+        break;
+
+      default:
+        error += `Wrong properties. \n`;
+    }
+  });
+
+  return error;
 };

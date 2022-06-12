@@ -33,13 +33,18 @@ router.get(
 
 router.put(
   "/:id",
+  updateUserValid,
   (req, res, next) => {
     try {
-      const user = UserService.update(req.params.id, req.body);
+      if (!res?.is400) {
+        const user = UserService.update(req.params.id, req.body);
+        res.data = user;
+      }
     } catch (error) {
-      res.is400 = true;
+      res.is404 = true;
       res.message = error.message;
     }
+    next();
   },
   responseMiddleware
 );
@@ -58,6 +63,21 @@ router.post(
       res.message = error.message;
     }
 
+    next();
+  },
+  responseMiddleware
+);
+
+router.delete(
+  "/:id",
+  (req, res, next) => {
+    try {
+      const user = UserService.delete(req.params.id);
+      res.data = user;
+    } catch (error) {
+      res.is404 = true;
+      res.message = error.message;
+    }
     next();
   },
   responseMiddleware
