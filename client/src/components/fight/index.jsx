@@ -6,12 +6,14 @@ import Fighter from "../fighter";
 import { Button } from "@material-ui/core";
 
 import "./fight.css";
+import Arena from "../Arena";
 
 class Fight extends React.Component {
   state = {
     fighters: [],
     fighter1: null,
     fighter2: null,
+    fightStart: false,
   };
 
   async componentDidMount() {
@@ -21,7 +23,10 @@ class Fight extends React.Component {
     }
   }
 
-  onFightStart = () => {};
+  onFightStart = () => {
+    console.log(this.state.fighters);
+    if (this.state.fighter1 && this.state.fighter2) this.setState({ fightStart: true });
+  };
 
   onCreate = (fighter) => {
     this.setState({ fighters: [...this.state.fighters, fighter] });
@@ -55,7 +60,9 @@ class Fight extends React.Component {
 
   render() {
     const { fighter1, fighter2 } = this.state;
-    return (
+    return this.state.fightStart ? (
+      <Arena leftFighter={fighter1} rightFighter={fighter2} />
+    ) : (
       <div id="wrapper">
         <NewFighter onCreated={this.onCreate} />
         <div id="figh-wrapper">
